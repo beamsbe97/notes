@@ -68,6 +68,14 @@ test = {"gender":[1,1,1,2,2],\
         "education":["Dip","Msc", "Bach", "Msc", "PhD"],\
         "ethnicity":["A", "B", "A", "A", "B"],\
         "job":["Eng", "Scientist", "Eng", "Scientist", "Scientist"]}
+
+student = {
+    "exam":['P','F','F','P','F','F','P','P','P','P','P','P','F','F','F'],\
+    "other_courses":['Y','N','Y','Y','N','Y','Y','Y','N','N','Y','N','Y','N','N'],\
+    "background":["Maths","Maths","Maths","CS","Other","Other","Maths","CS","Maths","CS","CS","Maths","Other","Other","Maths"],\
+    "work_status":["NW","W","W","NW","W","W","NW","NW","W","W","W","NW","W","NW","W"]
+}
+len(student["work_status"])
 dfTest = pd.DataFrame.from_dict(test)
 
 node1 = Node(dfTest, "job")
