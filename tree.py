@@ -12,6 +12,9 @@ class Node(Tree):
     def __init__(self, X, predict_feature):
         super().__init__(X, predict_feature)
         self.node_entropy = self.entropy(X)
+
+    def isLeaf(self):
+        return len(np.unique(self.X[self.predict_feature])) == 1
         
     def entropy(self, input_data):
         _, value_count = np.unique(input_data[self.predict_feature], return_counts=True)
@@ -26,29 +29,11 @@ class Node(Tree):
         nodes = []
         for i in range(0, len(split_classes)):
             nodes.append(self.X[self.X[feature]==split_classes[i]])
-        #node1 = self.X[self.X[feature]==split_classes[0]]
-        #node2 = self.X[self.X[feature]==split_classes[1]]
         
         n_parent = len(self.X)
-        
-        n_subnodes = []
-        for i in range(0, len(nodes)):
-            n_subnodes.append(len(nodes[i]))
-        
-        
-        
-        n_subnode1 = len(node1[node1[self.predict_feature] == self.output_classes[0]])
-        n_subnode2 = len(node2[node2[self.predict_feature] == self.output_classes[1]])
-       
-        entropy_node1 = self.entropy(node1)
-        entropy_node2 = self.entropy(node2)
-        
         avg_entropy = 0
-        
-        for i in range(0, len(split_classes)):
-            avg_entropy+= len
-        
-        avg_entropy = (n_subnode1/n_parent)*entropy_node1 +(n_subnode2/n_parent)*entropy_node2
+        for i in range(0, len(nodes)):
+            avg_entropy+= (len(nodes[i])/n_parent)*self.entropy(nodes[i])
         
         return avg_entropy
     
@@ -57,17 +42,33 @@ class Node(Tree):
     
     def splitSelect(self):
         highest_gain = 0
-        selected_feature = ""
+        self.selected_feature = ""
         for feature in self.features:
             if self.infoGain(feature) > highest_gain:
                 highest_gain = self.infoGain(feature)
-                selected_feature = feature
-        return selected_feature, highest_gain   
+                self.selected_feature = feature
+        return self.selected_feature, highest_gain  
+
+    def split(self): 
+        split_list= [] #each element is a node after splitting
+        split_values = np.unique(self.X[self.selected_feature])
+        for i in range(0, len(split_values)):
+            node = pd.DataFrame(self.X[self.X[self.selected_feature]==split_values[i]])
+            node = node.drop(columns=[self.selected_feature])
+            split_list.append(node)
+        return split_list
+
+class Classifier():
+    def __init__(self, input_data, min_split) -> None:
+        self.node = Node(input_data, "exam")
+        self.min_split = min_split
+    
+    def placeHolder():
         
-test = {"gender":[1,1,1,2,2],\
-        "education":["Dip","Msc", "Bach", "Msc", "PhD"],\
-        "ethnicity":["A", "B", "A", "A", "B"],\
-        "job":["Eng", "Scientist", "Eng", "Scientist", "Scientist"]}
+
+    def classify(self):
+        if self.node.isLeaf() or len(self.node.X) < self.min_split:
+
 
 student = {
     "exam":['P','F','F','P','F','F','P','P','P','P','P','P','F','F','F'],\
@@ -76,26 +77,22 @@ student = {
     "work_status":["NW","W","W","NW","W","W","NW","NW","W","W","W","NW","W","NW","W"]
 }
 len(student["work_status"])
-dfTest = pd.DataFrame.from_dict(test)
+dfTest = pd.DataFrame.from_dict(student)
 
-node1 = Node(dfTest, "job")
+node1 = Node(dfTest, "exam")
 
 node1_entropy = node1.entropy(node1.X)
-gender_avg_entropy = node1.avgChildEntropy("gender")
-
-print(node1.output_classes)
-print(node1.predict_feature)
-
-print(gender_avg_entropy)
-
-node1.features
+gender_avg_entropy = node1.avgChildEntropy("work_status")
+testInfo = node1.infoGain("work_status")
 
 print(node1.splitSelect())
+
+node2 = Node(node1.split()[0], "exam")
+node2.X
+node3 = Node(node1.split()[1], "exam")
+node3.X
 
 n = [1,2,3]
 m = [3,4,5]
 
 test = [a*b for a,b in zip(n,m)]
-
-
-
