@@ -4,7 +4,7 @@ class Tree():
     def __init__(self, X, predict_feature):
         self.X = X
         self.predict_feature = predict_feature
-        self.output_classes = np.unique(X[predict_feature])
+        self.output_classes, self.class_count = np.unique(X[predict_feature], return_counts=True)
         self.features = list(self.X.columns)
         self.features.remove(predict_feature)
         
@@ -58,16 +58,23 @@ class Node(Tree):
             split_list.append(node)
         return split_list
 
-class Classifier():
-    def __init__(self, input_data, min_split) -> None:
-        self.node = Node(input_data, "exam")
-        self.min_split = min_split
-    
-    def placeHolder():
-        
 
-    def classify(self):
-        if self.node.isLeaf() or len(self.node.X) < self.min_split:
+
+def leafClassifer(data, labelCol): 
+    classes, n_classes = np.unique(data[labelCol], return_counts=True)
+
+    return classes[n_classes.argmax()] #returns most frequent output class
+
+
+def decision_tree(data, labelCol, min_split):
+    node = Node(data,"exam")
+    if node.isLeaf() or len(node.X) < min_split: #default value for recursion
+        return leafClassifer(data, labelCol)
+    else:
+        split_nodes = node.split()
+        for i in range(0, len(split_nodes)):
+            decision_tree(split_nodes[i], labelCol, min_split)
+
 
 
 student = {
@@ -94,5 +101,5 @@ node3.X
 
 n = [1,2,3]
 m = [3,4,5]
-
+max(n)
 test = [a*b for a,b in zip(n,m)]
