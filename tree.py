@@ -72,12 +72,13 @@ class Node(Tree):
         return self.selected_feature, highest_gain  
 
     def split(self, split_by): 
-        split_list= [] #each element is a node after splitting
+        split_list= {} #each element is a node after splitting
         split_values = np.unique(self.X[split_by])
         for i in range(0, len(split_values)):
             node = pd.DataFrame(self.X[self.X[split_by]==split_values[i]])
             node = node.drop(columns=[split_by])
-            split_list.append(node)
+            split_list[split_values[i]] = node
+            #split_list.append(node)
         return split_list
 
 def leafClassifer(data, labelCol): 
@@ -87,16 +88,29 @@ def leafClassifer(data, labelCol):
 
 
 def decision_tree(data, labelCol, min_split):
-    node = Node(data,"exam")
-    if node.isLeaf() or len(node.X) < min_split: #default value for recursion
+    node = Node(data,labelCol)
+    if node.isLeaf() or len(node.X) < min_split or len(node.X.columns)==1: #default value for recursion
         return leafClassifer(data, labelCol)
     else:
-        split_nodes = node.split()
-        for i in range(0, len(split_nodes)):
-            decision_tree(split_nodes[i], labelCol, min_split)
+        node.split_select_infoGain()
+        split_nodes = node.split(node.selected_feature)
+        myTree = {node.selected_feature:{}}
+        
+        for subnode_name, subnode_data in split_nodes.items():
+            myTree[node.selected_feature][subnode_name] = decision_tree(subnode_data,labelCol, min_split)
+        return myTree
 
-def predict():
-    pass
+
+def predict(x, input_tree):
+    split_column = list(input_tree.keys())[0]
+    for key,value in input_tree[split_column].items():
+        if x[split_column].iloc[0] == key:
+            if type(value).__name__ == 'str':
+                return value
+            else:
+                return predict(x, input_tree[split_column][key])
+
+
 
 student = {
     "exam":['P','F','F','P','F','F','P','P','P','P','P','P','F','F','F'],\
@@ -104,18 +118,22 @@ student = {
     "background":["Maths","Maths","Maths","CS","Other","Other","Maths","CS","Maths","CS","CS","Maths","Other","Other","Maths"],\
     "work_status":["NW","W","W","NW","W","W","NW","NW","W","W","W","NW","W","NW","W"]
 }
+
+testVec = {
+    "exam":['P'],\
+    "other_courses":['N'],\
+    "background":["Maths"],\
+    "work_status":["NW"]
+}
+testVec = pd.DataFrame.from_dict(testVec)
+
 len(student["work_status"])
 dfTest = pd.DataFrame.from_dict(student)
 
 node1 = Node(dfTest, "exam")
 
-node1_entropy = node1.entropy(node1.X)
-gender_avg_entropy = node1.avgChildEntropy("work_status")
-testInfo = node1.infoGain("work_status")
+tree = decision_tree(dfTest,"exam", 2)
 
-print(node1.split_select_infoGain())
+testVec["predicted"] = testVec.apply(predict, args=(tree,),axis=1)
 
-sdf = node1.overall_gini("work_status")
-heyheyhey = node1.indi_gini(node1.X[node1.X["work_status"]=="W"])
-sdf
-heyheyhey
+
