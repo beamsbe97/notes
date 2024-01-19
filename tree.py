@@ -134,11 +134,12 @@ node1 = Node(dfTest, "exam")
 
 tree = decision_tree(dfTest,"exam", 2)
 
-testVec["predicted"] = testVec.apply(predict, args=(tree),axis=1)
+testVec["predicted"] = testVec.apply(predict, args=(tree,), axis=1)
 
 def testfun(x):
-    return x["exam"]+x["background"]
+    print(x)
 
+testfun(tree)
 dfTest.apply(testfun, axis=1)
 
 
