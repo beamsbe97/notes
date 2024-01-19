@@ -101,14 +101,14 @@ def decision_tree(data, labelCol, min_split):
         return myTree
 
 
-def predict(x, input_tree):
+def predict(input_row, input_tree):
     split_column = list(input_tree.keys())[0]
     for key,value in input_tree[split_column].items():
-        if x[split_column].iloc[0] == key:
+        if input_row[split_column] == key:
             if type(value).__name__ == 'str':
                 return value
             else:
-                return predict(x, input_tree[split_column][key])
+                return predict(input_row, input_tree[split_column][key])
 
 
 
@@ -134,6 +134,13 @@ node1 = Node(dfTest, "exam")
 
 tree = decision_tree(dfTest,"exam", 2)
 
-testVec["predicted"] = testVec.apply(predict, args=(tree,),axis=1)
+testVec["predicted"] = testVec.apply(predict, args=(tree),axis=1)
+
+def testfun(x):
+    return x["exam"]+x["background"]
+
+dfTest.apply(testfun, axis=1)
+
+
 
 
