@@ -21,7 +21,7 @@ data <- read.csv("./creditworthiness.csv")
 # and find interesting data based on the subset of the data created (using subset() function)
 classifiedData = subset(data, data[,46]>0)
 # Use correlation method to find interesting attribute
-corTable = abs(cor(classifiedData, y=classifiedData$credit.rating))
+corTable = abs(cor(classifiedData, y=classifiedData$credit.rating, method="spearman"))
 # To identify which features have a higher correlation value, i arrange the correlation table in descending order
 corTable = corTable[order(corTable, decreasing = TRUE),,drop = FALSE]
 head(corTable,6)
